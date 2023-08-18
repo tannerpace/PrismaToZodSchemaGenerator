@@ -32,7 +32,8 @@ function parseModel(modelStr: string): { name: string, fields: { name: string, t
   return { name, fields };
 }
 
-function convertToZod(fieldType: string, enums: string[]): string {
+
+function convertToZod(fieldType: string, enums: string[], models: string[]): string {
   switch (fieldType) {
     case 'String':
       return 'z.string()';
@@ -44,9 +45,13 @@ function convertToZod(fieldType: string, enums: string[]): string {
       if (enums.includes(fieldType)) {
         return `${fieldType}Enum`;
       }
+      if (models.includes(fieldType)) {
+        return `${fieldType}Schema`;
+      }
       return 'z.unknown()';
   }
 }
+
 
 function generateZodSchema(prismaSchema: string): string {
   let zodSchema = "import { z } from 'zod';\n\n";
@@ -54,9 +59,18 @@ function generateZodSchema(prismaSchema: string): string {
   const enumMatches = prismaSchema.match(/enum \w+ {[\s\S]*?}/g) || [];
   const modelMatches = prismaSchema.match(/model \w+ {[\s\S]*?}/g) || [];
 
-  const parsedEnums = enumMatches.map(parseEnum).filter(isNotNull);
-  const parsedModels = modelMatches.map(parseModel).filter(isNotNull);
 
+  const parsedModels = modelMatches.map(parseModel).filter(isNotNull);
+  const parsedEnums = enumMatches.map(parseEnum).filter(isNotNull);
+  for (const modelData of parsedModels) {
+    if (!modelData) continue;
+    zodSchema += `export const ${modelData.name}Schema = z.object({\n`;
+    for (const field of modelData.fields) {
+      zodSchema += `  ${field.name}: ${convertToZod(field.type, parsedEnums.map(e => e.name), parsedModels.map(m => m.name))},\n`;
+
+    }
+    zodSchema += '});\n\n';
+  }
 
   for (const enumData of parsedEnums) {
     if (!enumData) continue;
@@ -65,14 +79,7 @@ function generateZodSchema(prismaSchema: string): string {
     zodSchema += '\n]);\n\n';
   }
 
-  for (const modelData of parsedModels) {
-    if (!modelData) continue;
-    zodSchema += `export const ${modelData.name}Schema = z.object({\n`;
-    for (const field of modelData.fields) {
-      zodSchema += `  ${field.name}: ${convertToZod(field.type, parsedEnums.map(e => e.name))},\n`;
-    }
-    zodSchema += '});\n\n';
-  }
+
 
   return zodSchema;
 }
