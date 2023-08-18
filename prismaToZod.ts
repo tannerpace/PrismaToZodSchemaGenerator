@@ -53,7 +53,8 @@ function generateZodSchema(prismaSchema: string): string {
   const modelMatches = prismaSchema.match(/model \w+ {[\s\S]*?}/g) || [];
 
   const parsedEnums = enumMatches.map(parseEnum).filter(isNotNull);
-  const parsedModels = modelMatches.map(parseModel).filter(Boolean) as ReturnType<typeof parseModel>[];
+  const parsedModels = modelMatches.map(parseModel).filter(isNotNull);
+
 
   for (const enumData of parsedEnums) {
     if (!enumData) continue;
