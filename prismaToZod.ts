@@ -1,8 +1,10 @@
 import fs from 'fs';
 
-function isNotNull<T>(value: T | null): value is T {
-  return value !== null;
-}
+import { type } from 'os';
+import { isNotNull, isError } from './utils/type_gaurd';
+
+
+
 
 function parseEnum(enumStr: string): { name: string, values: string[] } | null {
   const enumMatch = enumStr.match(/enum (\w+) {([\s\S]*?)}/);
@@ -86,7 +88,11 @@ function main() {
     fs.writeFileSync(zodSchemaOutputPath, zodSchema);
     console.log(`Zod schema generated as ${zodSchemaOutputPath}`);
   } catch (error) {
-    console.error("Error generating Zod schema:", error.message);
+    if (isError(error)) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
   }
 }
 
