@@ -1,5 +1,9 @@
 import fs from 'fs';
 
+function isNotNull<T>(value: T | null): value is T {
+  return value !== null;
+}
+
 function parseEnum(enumStr: string): { name: string, values: string[] } | null {
   const enumMatch = enumStr.match(/enum (\w+) {([\s\S]*?)}/);
   if (!enumMatch) return null;
@@ -48,7 +52,7 @@ function generateZodSchema(prismaSchema: string): string {
   const enumMatches = prismaSchema.match(/enum \w+ {[\s\S]*?}/g) || [];
   const modelMatches = prismaSchema.match(/model \w+ {[\s\S]*?}/g) || [];
 
-  const parsedEnums = enumMatches.map(parseEnum).filter(Boolean) as ReturnType<typeof parseEnum>[];
+  const parsedEnums = enumMatches.map(parseEnum).filter(isNotNull);
   const parsedModels = modelMatches.map(parseModel).filter(Boolean) as ReturnType<typeof parseModel>[];
 
   for (const enumData of parsedEnums) {
