@@ -38,7 +38,7 @@ function convertToZod(fieldType: string, enums: string[]): string {
       if (enums.includes(fieldType)) {
         return `${fieldType}Enum`;
       }
-      return 'z.unknown()'; // Handle unknown types
+      return 'z.unknown()';
   }
 }
 
@@ -48,19 +48,21 @@ function generateZodSchema(prismaSchema: string): string {
   const enumMatches = prismaSchema.match(/enum \w+ {[\s\S]*?}/g) || [];
   const modelMatches = prismaSchema.match(/model \w+ {[\s\S]*?}/g) || [];
 
-  const parsedEnums = enumMatches.map(parseEnum).filter(Boolean);
-  const parsedModels = modelMatches.map(parseModel).filter(Boolean);
+  const parsedEnums = enumMatches.map(parseEnum).filter(Boolean) as ReturnType<typeof parseEnum>[];
+  const parsedModels = modelMatches.map(parseModel).filter(Boolean) as ReturnType<typeof parseModel>[];
 
   parsedEnums.forEach(enumData => {
+    if (!enumData) return;
     zodSchema += `export const ${enumData.name}Enum = z.union([\n  `;
     zodSchema += enumData.values.map(value => `z.literal('${value}')`).join(',\n  ');
     zodSchema += '\n]);\n\n';
   });
 
   parsedModels.forEach(modelData => {
+    if (!modelData) return;
     zodSchema += `export const ${modelData.name}Schema = z.object({\n`;
     modelData.fields.forEach(field => {
-      zodSchema += `  ${field.name}: ${convertToZod(field.type, parsedEnums.map(e => e.name))},\n`;
+      zodSchema += `  ${field.name}: ${convertToZod(field.type, parsedEnums.map(e => e!.name))},\n`;
     });
     zodSchema += '});\n\n';
   });
