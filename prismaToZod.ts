@@ -51,21 +51,21 @@ function generateZodSchema(prismaSchema: string): string {
   const parsedEnums = enumMatches.map(parseEnum).filter(Boolean) as ReturnType<typeof parseEnum>[];
   const parsedModels = modelMatches.map(parseModel).filter(Boolean) as ReturnType<typeof parseModel>[];
 
-  parsedEnums.forEach(enumData => {
-    if (!enumData) return;
+  for (const enumData of parsedEnums) {
+    if (!enumData) continue;
     zodSchema += `export const ${enumData.name}Enum = z.union([\n  `;
     zodSchema += enumData.values.map(value => `z.literal('${value}')`).join(',\n  ');
     zodSchema += '\n]);\n\n';
-  });
+  }
 
-  parsedModels.forEach(modelData => {
-    if (!modelData) return;
+  for (const modelData of parsedModels) {
+    if (!modelData) continue;
     zodSchema += `export const ${modelData.name}Schema = z.object({\n`;
-    modelData.fields.forEach(field => {
-      zodSchema += `  ${field.name}: ${convertToZod(field.type, parsedEnums.map(e => e!.name))},\n`;
-    });
+    for (const field of modelData.fields) {
+      zodSchema += `  ${field.name}: ${convertToZod(field.type, parsedEnums.map(e => e.name))},\n`;
+    }
     zodSchema += '});\n\n';
-  });
+  }
 
   return zodSchema;
 }
