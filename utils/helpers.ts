@@ -1,4 +1,4 @@
-
+import fs from 'fs';
 type Schema = {
   name: string;
   fields: { name: string, type: string }[];
@@ -130,6 +130,12 @@ function sortZodSchemas(zodSchema: string): string {
 }
 
 
+function writeToZodSchemaFile(zodSchema: string, zodSchemaOutputPath = './zodSchemas.ts') {
+  fs.writeFileSync(zodSchemaOutputPath, zodSchema);
+  console.log(`Zod schema generated as ${zodSchemaOutputPath}`);
+}
 
 
-export { isNotNull, isError, parseModel, parseEnum, convertToZod, sortZodSchemas }
+
+
+export { isNotNull, isError, parseModel, parseEnum, convertToZod, sortZodSchemas, writeToZodSchemaFile }
