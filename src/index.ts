@@ -34,7 +34,9 @@ function generateZodSchema(prismaSchema: string): string {
   return zodSchema;
 }
 function getDefaultPrismaSchemaPath(): string {
-  return path.join(process.cwd(), 'prisma', 'schema.prisma');
+  const result = path.join(process.cwd(), 'prisma', 'schema.prisma');
+  console.log(result);
+  return result;
 }
 
 function main(prismaSchemaPath = './schema.prisma', zodSchemaOutputPath = './zodSchemas.ts') {

@@ -1,5 +1,5 @@
 const fs = require('fs');
-import { generateZodSchema, main } from './prismaToZod';
+import { generateZodSchema, main } from './index';
 import { badPath, goodPath, goodSchema, badSchema } from './testHelpers';
 import { isNotNull, isError, parseModel, parseEnum, convertToZod, sortZodSchemas } from './utils/helpers';
 
@@ -92,7 +92,7 @@ describe('Prisma to Zod Conversion', () => {
     // Mock file system functions
     fs.writeFileSync.mockImplementation(() => { });
     fs.unlinkSync.mockImplementation(() => { });
-    fs.readFileSync.mockImplementation(path => {
+    fs.readFileSync.mockImplementation((path: string) => {
       if (path === goodPath) return goodSchema;
       if (path === badPath) return badSchema;
       return null;

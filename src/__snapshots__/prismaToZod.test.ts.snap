@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Prisma to Zod Conversion main expect bad should match good after sorting 1`] = `
+"export const UserRoleEnum = z.union([
+  z.literal('ADMIN'),
+  z.literal('USER')
+]);
+export const UserSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  role: UserRoleEnum,
+});"
+`;
+
+exports[`Prisma to Zod Conversion main should correctly generate a Zod schema file from a valid Prisma schema 1`] = `undefined`;
