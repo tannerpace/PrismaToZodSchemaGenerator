@@ -18,7 +18,7 @@ function isError(err: unknown): err is Error {
   return err instanceof Error;
 }
 
-function parseModel(modelStr: string): { name: string, fields: { name: string, type: string }[] } | null {
+function parseModel(modelStr: string): Schema | null {
   const modelMatch = modelStr.match(/model (\w+) {([\s\S]*?)}/);
   if (!modelMatch) return null;
 
@@ -26,13 +26,20 @@ function parseModel(modelStr: string): { name: string, fields: { name: string, t
   const fields = modelMatch[2]
     .trim()
     .split('\n')
+    .filter(line => !line.trim().startsWith('@') && line.includes(' '))
     .map(field => {
       const [fieldName, fieldType] = field.trim().split(/\s+/);
+      if (!fieldName || !fieldType) {
+        console.error(`Parsing error with field: "${field}" in model: ${name}`);
+        return null;
+      }
       return { name: fieldName, type: fieldType };
-    });
+    }).filter(isNotNull);
 
   return { name, fields };
 }
+
+
 
 
 function parseEnum(enumStr: string): { name: string, values: string[] } | null {
@@ -42,9 +49,6 @@ function parseEnum(enumStr: string): { name: string, values: string[] } | null {
   const values = enumMatch[2].trim().split(/\s+/);
   return { name, values };
 }
-
-
-
 
 function convertToZod(fieldType: string, enums: string[], models: string[]): string {
   switch (fieldType) {
@@ -64,27 +68,37 @@ function convertToZod(fieldType: string, enums: string[], models: string[]): str
       return 'z.unknown()';
   }
 }
-
 function sortZodSchemas(zodSchema: string): string {
   const lines = zodSchema.split('\n');
 
+  // Extract schema names and their content lines
+  const schemaContent: { [name: string]: string[] } = {};
+  let currentName: string | null = null;
 
-  const schemaLines: { [name: string]: string } = {};
   lines.forEach(line => {
-    const match = line.match(/const (\w+)Schema =/);
+    const match = line.match(/const (\w+)(Enum|Schema) =/);
     if (match) {
-      schemaLines[match[1]] = line;
+      currentName = match[1] + (match[2] || '');
+      schemaContent[currentName] = [];
+    }
+
+    if (currentName) {
+      schemaContent[currentName].push(line);
+      if (line.trim().endsWith(');') || line.trim().endsWith(']')) {
+        currentName = null;
+      }
     }
   });
 
-  const schemaNames = Object.keys(schemaLines);
+  const schemaNames = Object.keys(schemaContent);
 
-  // Build dependency graph
+  // Create a dependency graph
   const graph: { [name: string]: string[] } = {};
+
   schemaNames.forEach(name => {
     graph[name] = [];
     schemaNames.forEach(depName => {
-      if (name !== depName && schemaLines[name].includes(`${depName}Schema`)) {
+      if (name !== depName && schemaContent[name].some(l => l.includes(depName))) {
         graph[name].push(depName);
       }
     });
@@ -93,17 +107,29 @@ function sortZodSchemas(zodSchema: string): string {
   // Topological sort
   const result: string[] = [];
   const visited: { [name: string]: boolean } = {};
+  const visiting: { [name: string]: boolean } = {}; // For detecting cycles
 
   function visit(name: string) {
+    if (visiting[name]) {
+      throw new Error(`Cyclic dependency detected at ${name}`);
+    }
+
     if (!visited[name]) {
-      visited[name] = true;
+      visiting[name] = true;
       graph[name].forEach(visit);
+      visited[name] = true;
       result.push(name);
+      delete visiting[name];
     }
   }
-  schemaNames.forEach(visit);
-  return result.map(name => schemaLines[name]).join('\n');
+
+  schemaNames.forEach(name => {
+    if (!visited[name]) visit(name);
+  });
+
+  return result.map(name => schemaContent[name].join('\n')).join('\n');
 }
+
 
 
 
@@ -114,24 +140,21 @@ function generateZodSchema(prismaSchema: string): string {
   const enumMatches = prismaSchema.match(/enum \w+ {[\s\S]*?}/g) || [];
   const modelMatches = prismaSchema.match(/model \w+ {[\s\S]*?}/g) || [];
 
-
-  const parsedModels = modelMatches.map(parseModel).filter(isNotNull);
   const parsedEnums = enumMatches.map(parseEnum).filter(isNotNull);
-  for (const modelData of parsedModels) {
-    if (!modelData) continue;
-    zodSchema += `export const ${modelData.name}Schema = z.object({\n`;
-    for (const field of modelData.fields) {
-      zodSchema += `  ${field.name}: ${convertToZod(field.type, parsedEnums.map(e => e.name), parsedModels.map(m => m.name))},\n`;
-
-    }
-    zodSchema += '});\n\n';
-  }
-
   for (const enumData of parsedEnums) {
     if (!enumData) continue;
     zodSchema += `export const ${enumData.name}Enum = z.union([\n  `;
     zodSchema += enumData.values.map(value => `z.literal('${value}')`).join(',\n  ');
     zodSchema += '\n]);\n\n';
+  }
+  const parsedModels = modelMatches.map(parseModel).filter(isNotNull);
+  for (const modelData of parsedModels) {
+    if (!modelData) continue;
+    zodSchema += `export const ${modelData.name}Schema = z.object({\n`;
+    for (const field of modelData.fields) {
+      zodSchema += `  ${field.name}: ${convertToZod(field.type, parsedEnums.map(e => e.name), parsedModels.map(m => m.name))},\n`;
+    }
+    zodSchema += '});\n\n';
   }
   return zodSchema;
 }
@@ -139,14 +162,11 @@ function generateZodSchema(prismaSchema: string): string {
 function main() {
   const prismaSchemaPath = './schema.prisma';
   const zodSchemaOutputPath = './zodSchemas.ts';
-  const unSortedzodSchemaOutputPath = './unSortedZodSchemas.ts';
-
-
   try {
     const prismaSchema = fs.readFileSync(prismaSchemaPath, 'utf8');
     const zodSchema = generateZodSchema(prismaSchema);
-    const orderedSchema = sortZodSchemas(zodSchema);
-    fs.writeFileSync(zodSchemaOutputPath, orderedSchema);
+    const sortedZodSchema = sortZodSchemas(zodSchema);
+    fs.writeFileSync(zodSchemaOutputPath, sortedZodSchema);
     console.log(`Zod schema generated as ${zodSchemaOutputPath}`);
   } catch (error) {
     if (isError(error)) {
