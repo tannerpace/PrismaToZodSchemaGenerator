@@ -1,6 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = exports.generateZodSchema = void 0;
+const path_1 = __importDefault(require("path"));
+// ...
 const helpers_1 = require("./utils/helpers");
 function generateZodSchema(prismaSchema) {
     let zodSchema = "import * as z from 'zod';\n\n";
@@ -30,6 +35,9 @@ function generateZodSchema(prismaSchema) {
     return zodSchema;
 }
 exports.generateZodSchema = generateZodSchema;
+function getDefaultPrismaSchemaPath() {
+    return path_1.default.join(process.cwd(), 'prisma', 'schema.prisma');
+}
 function main(prismaSchemaPath = './schema.prisma', zodSchemaOutputPath = './zodSchemas.ts') {
     try {
         const prismaSchema = require('fs').readFileSync(prismaSchemaPath, 'utf-8');
@@ -48,6 +56,6 @@ function main(prismaSchemaPath = './schema.prisma', zodSchemaOutputPath = './zod
 }
 exports.main = main;
 const args = process.argv.slice(2);
-const prismaSchemaPath = args[0] || './schema.prisma';
+const prismaSchemaPath = args[0] || getDefaultPrismaSchemaPath();
 const zodSchemaOutputPath = args[1] || './zodSchemas.ts';
 main(prismaSchemaPath, zodSchemaOutputPath);
