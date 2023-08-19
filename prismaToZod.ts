@@ -1,7 +1,5 @@
-import fs from 'fs';
-import { convertToZod, isError, isNotNull, parseEnum, parseModel, sortZodSchemas } from './utils/helpers';
 
-
+import { convertToZod, isError, isNotNull, parseEnum, parseModel, sortZodSchemas, writeToZodSchemaFile } from './utils/helpers';
 function generateZodSchema(prismaSchema: string): string {
   let zodSchema = "import * as z from 'zod';\n\n";
 
@@ -31,15 +29,13 @@ function generateZodSchema(prismaSchema: string): string {
   return zodSchema;
 }
 
-function main() {
-  const prismaSchemaPath = './schema.prisma';
-  const zodSchemaOutputPath = './zodSchemas.ts';
+
+function main(prismaSchemaPath = './schema.prisma', zodSchemaOutputPath = './zodSchemas.ts') {
   try {
-    const prismaSchema = fs.readFileSync(prismaSchemaPath, 'utf8');
+    const prismaSchema = require('fs').readFileSync(prismaSchemaPath, 'utf-8');
     const zodSchema = generateZodSchema(prismaSchema);
     const sortedZodSchema = "import * as z from 'zod';\n\n" + sortZodSchemas(zodSchema);
-    fs.writeFileSync(zodSchemaOutputPath, sortedZodSchema);
-    console.log(`Zod schema generated as ${zodSchemaOutputPath}`);
+    writeToZodSchemaFile(sortedZodSchema, zodSchemaOutputPath);
   } catch (error) {
     if (isError(error)) {
       console.error("conversion error", error.message);
@@ -49,4 +45,12 @@ function main() {
   }
 }
 
-main();
+const args = process.argv.slice(2);
+const prismaSchemaPath = args[0] || './schema.prisma';
+const zodSchemaOutputPath = args[1] || './zodSchemas.ts';
+main(prismaSchemaPath, zodSchemaOutputPath);
+
+
+export { generateZodSchema, main };
+
+
