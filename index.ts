@@ -1,0 +1,1 @@
+export { generateZodSchema, main } from './src/prismaToZod';
