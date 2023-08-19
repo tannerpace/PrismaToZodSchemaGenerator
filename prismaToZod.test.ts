@@ -1,8 +1,83 @@
 const fs = require('fs');
-
 import { generateZodSchema, main } from './prismaToZod';
-import { sortZodSchemas } from './utils/helpers';
 import { badPath, goodPath, goodSchema, badSchema } from './testHelpers';
+import { isNotNull, isError, parseModel, parseEnum, convertToZod, sortZodSchemas } from './utils/helpers';
+
+describe('Helpers', () => {
+
+  describe('isNotNull', () => {
+    it('should return false for null values', () => {
+      expect(isNotNull(null)).toBe(false);
+    });
+
+    it('should return true for non-null values', () => {
+      expect(isNotNull(5)).toBe(true);
+    });
+  });
+
+  describe('isError', () => {
+    it('should return true for Error instances', () => {
+      expect(isError(new Error())).toBe(true);
+    });
+
+    it('should return false for non-Error values', () => {
+      expect(isError("not an error")).toBe(false);
+    });
+  });
+
+  describe('parseModel', () => {
+    it('should correctly parse a Prisma model', () => {
+      const modelStr = `
+        model User {
+          id Int
+          name String
+          @ignoreThisField
+        }
+      `;
+
+      const result = parseModel(modelStr);
+      expect(result).toEqual({
+        name: 'User',
+        fields: [
+          { name: 'id', type: 'Int' },
+          { name: 'name', type: 'String' }
+        ]
+      });
+    });
+  });
+
+  describe('parseEnum', () => {
+    it('should correctly parse a Prisma enum', () => {
+      const enumStr = `
+        enum UserRole {
+          ADMIN
+          USER
+        }
+      `;
+
+      const result = parseEnum(enumStr);
+      expect(result).toEqual({
+        name: 'UserRole',
+        values: ['ADMIN', 'USER']
+      });
+    });
+  });
+
+  describe('convertToZod', () => {
+    it('should convert basic Prisma types to Zod types', () => {
+      expect(convertToZod('String', [], [])).toBe('z.string()');
+      expect(convertToZod('Int', [], [])).toBe('z.number()');
+    });
+
+    it('should convert enums and models correctly', () => {
+      expect(convertToZod('UserRole', ['UserRole'], [])).toBe('UserRoleEnum');
+      expect(convertToZod('User', [], ['User'])).toBe('UserSchema');
+    });
+  });
+
+});
+
+
 
 
 jest.mock('fs');
