@@ -1,10 +1,50 @@
 {
+  "name": "prisma-zodifier",
+  "version": "1.0.2",
+  "description": "A utility to convert Prisma schemas to Zod schemas.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "convert": "ts-node ./index.ts",
+    "build": "tsc"
+  },
+  "keywords": [
+    "prisma",
+    "zod",
+    "schema",
+    "convert",
+    "utility",
+    "typescript",
+    "ts",
+    "type",
+    "types",
+    "type-safe",
+    "type-safe schema",
+    "type-safe schemas",
+    "type-safe prisma",
+    "type-safe prisma schema",
+    "type-safe prisma schemas",
+    "type-safe zod",
+    "type-safe zod schema",
+    "type-safe zod schemas",
+    "type-safe prisma-to-zod",
+    "type-safe prisma to zod",
+    "type-safe prisma-to-zod schema",
+    "type-safe prisma-to-zod schemas",
+    "type-safe prisma-to-zod utility"
+  ],
+  "author": "Tanner Bleakley <tannerpace at gmail dot com>",
+  "license": "MIT",
   "devDependencies": {
     "@types/jest": "^29.5.3",
     "@types/node": "^20.5.1",
     "jest": "^29.6.2",
     "ts-jest": "^29.1.1"
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6",
@@ -16,9 +56,5 @@
     },
     "testEnvironment": "node",
     "testRegex": ".test.(ts|tsx)$"
-  },
-  "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch"
   }
 }
