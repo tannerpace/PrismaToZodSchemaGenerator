@@ -10,7 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "convert": "ts-node ./src/index.ts",
-    "build": "tsc"
+    "build": "tsc && node ./src/addShebang.js"
   },
   "keywords": [
     "prisma",

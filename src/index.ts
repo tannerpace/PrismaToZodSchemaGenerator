@@ -1,8 +1,4 @@
-
-`#!/usr/bin/env node`
 import path from 'path';
-import fs from 'fs';
-
 
 
 import { convertToZod, isError, isNotNull, parseEnum, parseModel, sortZodSchemas, writeToZodSchemaFile } from './utils/helpers';
