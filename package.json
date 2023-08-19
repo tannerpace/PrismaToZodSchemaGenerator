@@ -3,7 +3,7 @@
   "bin": {
     "prisma-zodifier": "./index.ts"
   },
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A utility to convert Prisma schemas to Zod schemas.",
   "main": "dist/index.js",
   "scripts": {
