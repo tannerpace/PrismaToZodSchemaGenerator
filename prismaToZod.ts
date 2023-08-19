@@ -65,9 +65,10 @@ function convertToZod(fieldType: string, enums: string[], models: string[]): str
       if (models.includes(fieldType)) {
         return `${fieldType}Schema`;
       }
-      return 'z.unknown()';
+      return '';
   }
 }
+
 function sortZodSchemas(zodSchema: string): string {
   const lines = zodSchema.split('\n');
 
@@ -135,7 +136,8 @@ function sortZodSchemas(zodSchema: string): string {
 
 
 function generateZodSchema(prismaSchema: string): string {
-  let zodSchema = "import { z } from 'zod';\n\n";
+  let zodSchema = "import * as z from 'zod';\n\n";
+
 
   const enumMatches = prismaSchema.match(/enum \w+ {[\s\S]*?}/g) || [];
   const modelMatches = prismaSchema.match(/model \w+ {[\s\S]*?}/g) || [];
@@ -151,8 +153,12 @@ function generateZodSchema(prismaSchema: string): string {
   for (const modelData of parsedModels) {
     if (!modelData) continue;
     zodSchema += `export const ${modelData.name}Schema = z.object({\n`;
+
     for (const field of modelData.fields) {
-      zodSchema += `  ${field.name}: ${convertToZod(field.type, parsedEnums.map(e => e.name), parsedModels.map(m => m.name))},\n`;
+      const fieldType = convertToZod(field.type, parsedEnums.map(e => e.name), parsedModels.map(m => m.name));
+      if (fieldType) {  // Skip unsupported types so we don't get a bunch of `z.unknown()` fields
+        zodSchema += `  ${field.name}: ${fieldType},\n`;
+      }
     }
     zodSchema += '});\n\n';
   }
@@ -165,7 +171,8 @@ function main() {
   try {
     const prismaSchema = fs.readFileSync(prismaSchemaPath, 'utf8');
     const zodSchema = generateZodSchema(prismaSchema);
-    const sortedZodSchema = sortZodSchemas(zodSchema);
+    // const sortedZodSchema = sortZodSchemas(zodSchema);
+    const sortedZodSchema = "import * as z from 'zod';\n\n" + sortZodSchemas(zodSchema);
     fs.writeFileSync(zodSchemaOutputPath, sortedZodSchema);
     console.log(`Zod schema generated as ${zodSchemaOutputPath}`);
   } catch (error) {
