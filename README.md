@@ -1,5 +1,8 @@
 # prisma-zodifier
 
+[![npm downloads](https://img.shields.io/npm/dm/prisma-zodifier.svg)](https://www.npmjs.com/package/prisma-zodifier)
+
+
 [![npm version](https://img.shields.io/npm/v/prisma-zodifier.svg)](https://www.npmjs.com/package/prisma-zodifier)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
@@ -68,3 +71,4 @@ yarn test:watch
 ## License
 
 `prisma-zodifier` is available under the MIT license. See the `LICENSE` file for more info.
+
