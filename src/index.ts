@@ -53,7 +53,7 @@ function main(prismaSchemaPath = './schema.prisma', zodSchemaOutputPath = './zod
 
 const args = process.argv.slice(2);
 const prismaSchemaPath = args[0] || getDefaultPrismaSchemaPath();
-const zodSchemaOutputPath = args[1] || './zodSchemas.ts';
+const zodSchemaOutputPath = args[1] || './src/zodSchemas.ts';
 main(prismaSchemaPath, zodSchemaOutputPath);
 
 
