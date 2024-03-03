@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 type Schema = {
   name: string;
   fields: { name: string, type: string }[];
@@ -130,9 +131,9 @@ function sortZodSchemas(zodSchema: string): string {
 }
 
 
-function writeToZodSchemaFile(zodSchema: string, zodSchemaOutputPath = './src/zodSchemas.ts') {
-  fs.writeFileSync(zodSchemaOutputPath, zodSchema);
-  console.log(`Zod schema generated as ${zodSchemaOutputPath}`);
+function writeToZodSchemaFile(zodSchema: string) {
+  const absoluteOutputPath = path.join(process.cwd(), './endpoint-validation/zodSchemas.ts');
+  fs.writeFileSync(absoluteOutputPath, zodSchema);
 }
 
 
