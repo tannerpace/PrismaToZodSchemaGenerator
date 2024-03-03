@@ -59,5 +59,5 @@ function main(prismaSchemaPath = './schema.prisma', zodSchemaOutputPath = './zod
 exports.main = main;
 const args = process.argv.slice(2);
 const prismaSchemaPath = args[0] || getDefaultPrismaSchemaPath();
-const zodSchemaOutputPath = args[1] || './src/zodSchemas.ts';
+const zodSchemaOutputPath = args[1] || './src/routes/zodSchemas.ts';
 main(prismaSchemaPath, zodSchemaOutputPath);
