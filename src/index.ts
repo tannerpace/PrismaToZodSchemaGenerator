@@ -36,7 +36,7 @@ function getDefaultPrismaSchemaPath(): string {
   return result;
 }
 
-function main(prismaSchemaPath = './schema.prisma', zodSchemaOutputPath = './zodSchemas.ts') {
+function main(prismaSchemaPath = './schema.prisma', zodSchemaOutputPath = '.src/zodSchemas.ts') {
   try {
     const prismaSchema = require('fs').readFileSync(prismaSchemaPath, 'utf-8');
     const zodSchema = generateZodSchema(prismaSchema);
