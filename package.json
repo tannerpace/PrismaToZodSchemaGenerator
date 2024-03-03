@@ -3,7 +3,7 @@
   "bin": {
     "prisma-zodifier": "./dist/src/index.js"
   },
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "A utility to convert Prisma schemas to Zod schemas.",
   "main": "dist/index.js",
   "scripts": {
@@ -52,12 +52,11 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6",
     "zod": "^3.22.2"
-    
   },
   "peerDependencies": {
-    "@babel/core": "^7.11.0",
-    "eslint": "^6.0.0"
-  },  
+    "@babel/core": ">=7.11.0 <8.0.0",
+    "eslint": ">=8.0.0"
+  },
   "jest": {
     "transform": {
       ".(ts|tsx)": "ts-jest"
