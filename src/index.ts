@@ -41,7 +41,9 @@ function main(prismaSchemaPath = './schema.prisma', zodSchemaOutputPath = '.src/
     const prismaSchema = require('fs').readFileSync(prismaSchemaPath, 'utf-8');
     const zodSchema = generateZodSchema(prismaSchema);
     const sortedZodSchema = "import * as z from 'zod';\n\n" + sortZodSchemas(zodSchema);
-    writeToZodSchemaFile(sortedZodSchema, zodSchemaOutputPath);
+    // Construct the absolute path for zodSchemaOutputPath
+    const absoluteOutputPath = path.join(process.cwd(), zodSchemaOutputPath);
+    writeToZodSchemaFile(sortedZodSchema, absoluteOutputPath);
   } catch (error) {
     if (isError(error)) {
       console.error("conversion error", error.message);
