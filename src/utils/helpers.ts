@@ -130,7 +130,7 @@ function sortZodSchemas(zodSchema: string): string {
 }
 
 
-function writeToZodSchemaFile(zodSchema: string, zodSchemaOutputPath = './zodSchemas.ts') {
+function writeToZodSchemaFile(zodSchema: string, zodSchemaOutputPath = './src/zodSchemas.ts') {
   fs.writeFileSync(zodSchemaOutputPath, zodSchema);
   console.log(`Zod schema generated as ${zodSchemaOutputPath}`);
 }
