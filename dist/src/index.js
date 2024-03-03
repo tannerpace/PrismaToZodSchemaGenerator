@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = exports.generateZodSchema = void 0;
-`#!/usr/bin/env node`;
 const path_1 = __importDefault(require("path"));
 const helpers_1 = require("./utils/helpers");
 function generateZodSchema(prismaSchema) {
@@ -60,5 +59,5 @@ function main(prismaSchemaPath = './schema.prisma', zodSchemaOutputPath = './zod
 exports.main = main;
 const args = process.argv.slice(2);
 const prismaSchemaPath = args[0] || getDefaultPrismaSchemaPath();
-const zodSchemaOutputPath = args[1] || './zodSchemas.ts';
+const zodSchemaOutputPath = args[1] || './src/zodSchemas.ts';
 main(prismaSchemaPath, zodSchemaOutputPath);
